@@ -1,0 +1,252 @@
+<!DOCTYPE HTML> 
+<html>
+    <head> 
+    <link rel="stylesheet" href="stick.css" type="text/css">
+    <script src="kinetic2d-v1.0.2.js"></script>
+    <script>
+            var canvasWidth;
+            var canvasHeight;
+            var centerX;
+            var centerY;
+            var w = 60; //stick width
+            var h = 10; //stick height
+            var armsAngle = 50;
+            var legsAngle = 60;
+            var bodyToArmRatio = 1.4;
+            var legToArmRatio = 1.4;
+            var headToArmRation = 0.9;          
+
+            function drawStick(x, y, w, h, angle)
+            {
+                context.save();
+                if(angle != 0)
+                {                    
+                    var r = toRadians(angle);
+                    context.transform(Math.cos(r), Math.sin(r), -Math.sin(r), Math.cos(r), 0, 0);
+                    //context.rotate(toRadians(angle));
+                }
+                context.fillRect(x, y, w, h);                
+                context.restore();
+            }
+            
+            function drawMan(scale)
+            {
+                context.save();
+                if(scale != 0)
+                    context.scale(scale, scale);
+                
+                //Draw head
+                context.save();
+                context.beginPath();
+                context.lineWidth = h;
+                context.strokeStyle = "#000000";
+                context.fillStyle = "#FFFF00";
+                context.beginPath();
+                context.arc(0, -w*headToArmRation, w*headToArmRation/2,0,toRadians(360),true);
+                context.closePath();
+                context.stroke();
+                context.fill();
+                context.restore();
+                
+                //draw body
+                context.save();
+                drawStick(-h/2, -w*headToArmRation/2, h, w*bodyToArmRatio, 0);                
+                context.restore();
+                
+                //Draw arms
+                context.save();
+                context.translate(0, -15);
+                //Draw right arm
+                drawStick(0, -h/2, w, h, armsAngle);                
+                //Draw left arm                
+                drawStick(-w, -h/2, w, h, -armsAngle)                
+                context.restore();
+                
+                //Draw legs
+                context.save();
+                context.translate(0, (w*bodyToArmRatio)-(w/2));
+                //Draw right leg
+                drawStick(0, -h/2, w*legToArmRatio, h, legsAngle);    
+                //Draw left leg
+                drawStick(-w*legToArmRatio, -h/2, w*legToArmRatio, h, -legsAngle);                
+                context.restore();                
+                
+                context.restore();
+            }
+            
+            function drawCar(scale)
+            {
+                context.save();
+                if(scale != 0)
+                    context.scale(scale, scale);
+                
+                drawStick(0, 0, w+w/2, h, 0);
+                drawStick(0, 0, 5*w, h, -20); //windshield
+                drawStick(2*w+w/2, 0, 3*w, h, 0);
+                //This formula to calculate length of line: 6.5*w/Math.cos(toRadians(-5))
+                //comes from length of car = 8.5w, begining of line = 2w
+                //some trigonometry to calculate h => cos(a) = adjacent side (which is 6.5w) / h
+                var lengthOfConvertibleTop = 6.5*w/Math.cos(toRadians(-5));
+                drawStick(2*w, -w/2, lengthOfConvertibleTop, h, -5);
+                drawStick(8.5*w-h, 0, h, -w-14, 0);
+                drawStick(6*w+w/2, 0, 2*w, h, 0);
+                
+                //Draw front wheel
+                context.beginPath();
+                context.lineWidth = h;
+                context.strokeStyle = "#000000";
+                context.arc(2*w, h/2, w/2, 0, toRadians(360), true);
+                context.closePath();
+                context.stroke();
+                
+                //Draw rear wheel
+                context.beginPath();
+                context.lineWidth = h;
+                context.strokeStyle = "#000000";
+                context.arc(6*w, h/2, w/2, 0, toRadians(360), true);
+                context.closePath();
+                context.stroke();
+                
+                context.restore();
+            }
+            
+            function drawBloood(scale){
+                context.save();
+                context.translate(centerX, centerY);                
+                context.scale(scale, scale);
+                context.moveTo(centerX, centerY);
+                context.beginPath();
+                context.lineWidth = 0;
+                context.strokeStyle = "#990000";
+                context.fillStyle = "#990000";
+                context.beginPath();
+                context.arc(0, 0, 60,0,toRadians(360),true);
+                context.arc(-30, 30, 60,0,toRadians(360),true);
+                context.arc(30, 30, 60,0,toRadians(360),true);
+                context.closePath();
+                context.stroke();
+                context.fill();
+                context.restore();
+            }
+            
+            function toRadians(angle)
+            {
+                return angle*Math.PI/180;
+            }
+
+        
+            function init()
+            {
+               canvas = document.getElementById("stickScene");
+               context = canvas.getContext("2d");
+               this.canvasWidth = canvas.width;
+               this.canvasHeight = canvas.height;
+                this.centerX = canvasWidth/2;
+                this.centerY = canvasHeight/2;
+            }
+
+            function run()
+            {
+                // Update parameters here.
+                // Call this function at every iteration of the animation.
+                // Notice the js library that I included and didn't use - details in the reading
+            }
+
+            window.onload = function() {
+               init();
+
+                kin = new Kinetic_2d("stickScene");
+                    
+                var scale = 1;
+                var startMan = 0;
+                var startCar = canvasWidth;
+                var legMoveDelta = 1.7; //Rate at which the leg angle changes (to simulate running)
+                var planeTheta = 0;
+                var planeTilt = 1; // ranges between -1 and 1
+                var manMoveRate = 1;
+                var spectatorScale = 0.01;
+                var spect1x = 0;
+                var spect1y = 0;
+                var spect2x = canvasWidth;
+                var spect2y = 0;
+                var spect3x = 0;
+                var spect3y = canvasHeight;
+                var spect4x = canvasWidth;
+                var spect4y = canvasHeight;
+                var bloodScale = .1;
+                var spectatorRate = 1.5;
+                kin.setDrawStage(function(){
+                    kin.clear();
+                    context.save();
+                    
+                    context.translate(startMan += manMoveRate, centerY);
+                                        
+                    if(startCar >= 0){
+                        legsAngle += legMoveDelta;
+                        if(legsAngle >= 85 || legsAngle <= 58)
+                            legMoveDelta *= -1;
+                        drawMan(scale);                        
+                    } else {
+                        //Car hit the man! make him fly
+                        context.save();
+                        context.scale(1, planeTilt);
+                        context.rotate(planeTheta);
+                        
+                        if(planeTilt >= 0){  
+                            planeTheta += 0.05;
+                            planeTilt = Math.sin(planeTheta / 2);
+                            //speed up rate of man's movement
+                            startMan +=2;
+                        } else{                       
+                            legsAngle += legMoveDelta;
+                            if(legsAngle >= 85 || legsAngle <= 58)
+                                legMoveDelta *= -1;
+                            manMoveRate = 0;                            
+                            context.save();
+                            context.setTransform(1, 0, 0, 1, 0, 0);
+                            drawBloood(bloodScale += .001);
+                            context.save();
+                            //Make spectators move erraticaly (following a sine wave equation)
+                            spect1x = 30 * Math.sin(spect1y / 9.05);
+                            context.translate(spect1x += spect3x, spect1y++);
+                            drawMan(spectatorScale += .001);
+                            context.restore();
+                            context.save();
+                            context.translate(spect2x--, spect2y++);
+                            drawMan(spectatorScale += .001);
+                            context.restore();
+                            context.save();
+                            context.translate(spect3x += spectatorRate, spect3y--);
+                            drawMan(spectatorScale += .001);
+                            context.restore();
+                            context.save();
+                            spect4x = 30 * Math.sin(spect4y / 9.05);
+                            context.translate(spect2x - spect4x, spect4y--);
+                            drawMan(spectatorScale += .001);
+                            context.restore();
+                            
+                            context.restore();
+                            if(spectatorScale >= 1){
+                                kin.stopAnimation();
+                            }
+                        }
+                        
+                        drawMan(scale);
+                        context.restore();                        
+                    }
+                    context.save();
+                    context.translate(startCar -= 7, 80);
+                    drawCar(1);
+                    context.restore();
+                    context.restore();
+                    
+                });
+                
+                kin.startAnimation();
+            };
+        </script> 
+    </head> 
+    <body onmousedown="return false;" > 
+        <canvas id="stickScene" width="960" height="640"></canvas> 
+    </body>
+</html>
