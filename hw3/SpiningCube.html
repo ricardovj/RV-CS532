@@ -327,9 +327,6 @@
         teapotVertexColorBuffer.numItems = 1;
     }
 
-
-    
-    var xRot = 0;
     function drawScene() {
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -375,9 +372,8 @@
         gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
         drawTeapot();
         mvPopMatrix();
-        
-        
     }
+    
     function drawTeapot() {
 
         mvPushMatrix();
@@ -431,10 +427,6 @@
 
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.enable(gl.DEPTH_TEST);
-
-        //tick();
-        if(framerate == 'undefined')
-            framerate = new Framerate("framerate");
         
         function handleContextLost(e) {
             gl.console.log("handle context lost");
@@ -452,16 +444,7 @@
         }
     }
     
-    var lastTime = 0;
-    function animate() {
-        var timeNow = new Date().getTime();
-        if (lastTime != 0) {
-            var elapsed = timeNow - lastTime;
-
-            xRot += (90 * elapsed) / 1000.0;
-        }
-        lastTime = timeNow;
-        
+    function animate() {    
         cubeSpinAngle += incAngle;
         if (cubeSpinAngle > 360)
             cubeSpinAngle -= 360;
@@ -554,7 +537,6 @@
 <body onload="webGLStart();">
     <canvas id="example" style="border: none;" width="1200" height="999"></canvas>
     
-    <div id="framerate">Framerate:35fps</div>
     <p />
     <input type="button" onclick="playPause();" value="Play" id="playPauseButton" />
     <input type="button" onclick="spinCameraAroundZ();" value="Spin around Z" id="sendAroundZ" />
@@ -569,10 +551,10 @@
     <input id="pitch" type="range" min="-90" max="90" value="90" onchange="setPitch()"/>
     
     <label id="roll_slider_label" for="slider">Roll: </label>
-    <input id="roll" type="range" min="0" max="90" value="0" onchange="setRoll()"/>	
+    <input id="roll" type="range" min="-90" max="90" value="0" onchange="setRoll()"/>	
     
     <label id="yaw_slider_label" for="slider">Yaw: </label>
-    <input id="yaw" type="range" min="0" max="90" value="0" onchange="setYaw()"/>
+    <input id="yaw" type="range" min="-90" max="90" value="0" onchange="setYaw()"/>
 </body>
 
 </html>
