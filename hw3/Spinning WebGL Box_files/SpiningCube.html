@@ -337,12 +337,24 @@
         mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
         mat4.identity(mvMatrix);
         mvMatrix = mat4.lookAt([0, 0, 7], [0, 0, 0], [0, 1, 0]);
-     gl.uniform1i(shaderProgram.useLightingUniform, false);
+        
+        
+        gl.uniform1i(shaderProgram.showSpecularHighlightsUniform, true);
+
+        gl.uniform1i(shaderProgram.useLightingUniform, true);
+        gl.uniform3f(shaderProgram.ambientColorUniform, 0.2, 0.2, 0.2);
+        gl.uniform3f(shaderProgram.pointLightingLocationUniform, -50.0, 5.0, 100.0);
+        gl.uniform3f(shaderProgram.pointLightingSpecularColorUniform,0.8,0.8,0.8);
+        gl.uniform3f(shaderProgram.pointLightingDiffuseColorUniform,0.8,0.8,0.8);
+        
+        gl.uniform1i(shaderProgram.useTexturesUniform, false);
+        
        //Draw cube
         mvPushMatrix();
         mat4.rotate(mvMatrix, degToRad(pitchAngle), [1, 0, 0]);
-        mat4.rotate(mvMatrix, degToRad(xRot), [0,1,0]);
-        
+        mat4.rotate(mvMatrix, degToRad(currentAngle), [0,1,0]);
+        mat4.rotate(mvMatrix, degToRad(yawAngle), [0,1,0]);
+        mat4.rotate(mvMatrix, degToRad(rollAngle), [0,0,1]);
  
         gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
         gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
@@ -364,31 +376,9 @@
         
     }
     function drawTeapot() {
-        /*gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        if (teapotVertexPositionBuffer == null || teapotVertexNormalBuffer == null || teapotVertexTextureCoordBuffer == null || teapotVertexIndexBuffer == null) {
-            return;
-        }
-
-        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);*/
-
-        gl.uniform1i(shaderProgram.showSpecularHighlightsUniform, true);
-
-        gl.uniform1i(shaderProgram.useLightingUniform, true);
-        gl.uniform3f(shaderProgram.ambientColorUniform, 0.2, 0.2, 0.2);
-        gl.uniform3f(shaderProgram.pointLightingLocationUniform, -10.0, 4.0, 20.0);
-        gl.uniform3f(shaderProgram.pointLightingSpecularColorUniform,0.8,0.8,0.8);
-        gl.uniform3f(shaderProgram.pointLightingDiffuseColorUniform,0.8,0.8,0.8);
-        //gl.uniform1i(shaderProgram.useColorUniform, false);
-        
-        gl.uniform1i(shaderProgram.useTexturesUniform, false);
-
-        //mat4.identity(mvMatrix);
         mvPushMatrix();
         mat4.translate(mvMatrix, [0, 1.7, 0]);
-        //mat4.rotate(mvMatrix, degToRad(23.4), [1, 0, -1]);
-        //mat4.rotate(mvMatrix, degToRad(xRot), [0, 1, 0]);
         mat4.scale(mvMatrix, [0.1, 0.1, 0.1]);
         gl.uniform1i(shaderProgram.samplerUniform, 0);
 
@@ -409,7 +399,7 @@
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, teapotVertexIndexBuffer);
         setMatrixUniforms();
         gl.drawElements(gl.TRIANGLES, teapotVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
-        //mvPopMatrix();
+        mvPopMatrix();
     }
 
     function mvPushMatrix() {
@@ -431,7 +421,7 @@
     }
 
     function webGLStart() {
-        var canvas = document.getElementById("example");
+        canvas = document.getElementById("example");
         initGL(canvas);
         initShaders();
         initBuffers();
@@ -439,11 +429,25 @@
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.enable(gl.DEPTH_TEST);
 
-        tick();
+        //tick();
+        
+        function handleContextLost(e) {
+            gl.console.log("handle context lost");
+            e.preventDefault();
+            if (requestId !== undefined) {
+                cancelRequestAnimFrame(requestId);
+                requestId = undefined;
+            }
+        }
+
+        function handleContextRestored() {
+            gl.console.log("handle context restored");
+            webGLStart();
+            tick();
+        }
     }
     
     var lastTime = 0;
-    var pitchAngle = 90;
     function animate() {
         var timeNow = new Date().getTime();
         if (lastTime != 0) {
@@ -452,19 +456,76 @@
             xRot += (90 * elapsed) / 1000.0;
         }
         lastTime = timeNow;
-    }
-
-    function setPitch(){
-        pitchAngle = document.getElementById('pitch').value;
+        
+        currentAngle += incAngle;
+        if (currentAngle > 360)
+            currentAngle -= 360;
+            
+        if(sendAroundZ)
+            pitchAngle++;
+        if(pitchAngle > 360)
+            pitchAngle -= 360;
+        if(sendAroundX)
+            yawAngle++;
+        if(yawAngle > 360)
+            yawAngle -= 360;
     }
 
     function tick() {
-        requestAnimFrame(tick);
+        requestId = requestAnimFrame(tick);
         drawScene();
         animate();
     }
 
-
+    //Camera movement controls
+    var incAngle = 0.2;
+    var pitchAngle = 90;
+    var rollAngle = 0;
+    var yawAngle = 0;
+    var sendAroundX = false;
+    var sendAroundZ = false;
+    var running = false;
+    var requestId;
+    var currentAngle = 0;
+    function playPause(){
+        if(running)
+            window.cancelRequestAnimFrame(requestId);
+        else
+            requestAnimFrame(tick, canvas);
+        running = !running;
+        var btn = document.getElementById("playPauseButton");
+        btn.value = running ? "Pause" : "Play";
+    }
+    
+    function setSpeed(){
+        incAngle = document.getElementById('speed').value / 10;
+    }
+    
+    function setPitch(){
+        pitchAngle = document.getElementById('pitch').value;
+    }
+    
+    function setRoll(){
+        rollAngle = document.getElementById('roll').value;
+    }
+    
+    function setYaw(){
+        yawAngle = document.getElementById('yaw').value;
+    }
+    
+    function spinCameraAroundZ() {
+        sendAroundZ = !sendAroundZ;
+        
+        var btn = document.getElementById("sendAroundZ");
+        btn.value = sendAroundZ ? "Stop spin around Z" : "Start spin around Z";
+    }
+    
+    function spinCameraAroundX() {
+        sendAroundX = !sendAroundX;
+        
+        var btn = document.getElementById("sendAroundX");
+        btn.value = sendAroundX ? "Stop spin around X" : "Start spin around X";
+    }
 </script>
 
 
@@ -473,9 +534,21 @@
 
 <body onload="webGLStart();">
     <canvas id="example" style="border: none;" width="1200" height="999"></canvas>
+    <input type="button" onclick="playPause();" value="Play" id="playPauseButton" />
+    <input type="button" onclick="spinCameraAroundZ();" value="Spin around Z" id="sendAroundZ" />
+    <input type="button" onclick="spinCameraAroundX();" value="Spin around X" id="sendAroundX" />
+    <label id="speed_slider_label" for="slider">Speed: </label>
+    <input id="speed" type="range" min="1" max="100" value="5" onchange="setSpeed()"/>
     
     <label id="pitch_slider_label" for="slider">Pitch: </label>
-    <input id="pitch" type="range" min="0" max="90" value="90" onchange="setPitch()"/>
+    <input id="pitch" type="range" min="-90" max="90" value="90" onchange="setPitch()"/>
+    
+    <label id="roll_slider_label" for="slider">Roll: </label>
+    <input id="roll" type="range" min="0" max="90" value="0" onchange="setRoll()"/>	
+    
+    <label id="yaw_slider_label" for="slider">Yaw: </label>
+    <input id="yaw" type="range" min="0" max="90" value="0" onchange="setYaw()"/>			
+
 </body>
 
 </html>
