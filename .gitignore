@@ -5,6 +5,7 @@ hw3/.DS_Store
 
 .DS_Store
 
+<<<<<<< HEAD
 hw3/Teapot.json
 
 .DS_Store
@@ -23,4 +24,6 @@ hw3/.DS_Store
 
 hw3/.DS_Store
 
+=======
+>>>>>>> ignoring
 .DS_Store
