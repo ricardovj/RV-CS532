@@ -28,10 +28,14 @@
             var t = 0;
             var arm1Angle = 30;
             var arm2Angle = 0;
-            var arm1FinalX = 75;
-            var arm2FinalX = -75;
+            var arm1FinalX = 78;
+            var arm2FinalX = -78;
+            var arm3FinalX = 480;
             var arm1CurrentX = 0;
             var arm2CurrentX = 0;
+            var arm3CurrentX = 0;
+            var arm3CurrentY = 0;
+            var arm3FinalY = 460;
             function run()
             {
                 animate();
@@ -43,14 +47,20 @@
                 // Update parameters here.
                 // Call this function at every iteration of the animation.
                 // Notice the js library that I included and didn't use - details in the reading
-                if(arm1Angle <= 45)
-                    arm1Angle += 0.1;
-                if(arm2Angle >= -45)
-                    arm2Angle -= 0.1;
+                if(arm1Angle <= 60)
+                    arm1Angle += 0.2;
+                if(arm2Angle >= -60)
+                    arm2Angle -= 0.2;
                 if(arm1CurrentX <= arm1FinalX)
-                    arm1CurrentX += 0.1;
+                    arm1CurrentX += 0.2;
                 if(arm2CurrentX >= arm2FinalX)
-                    arm2CurrentX -= 0.1;
+                    arm2CurrentX -= 0.2;
+                if(arm3CurrentX <= arm3FinalX)
+                    arm3CurrentX += 0.8;
+                if(arm3CurrentY <= arm3FinalY)
+                    arm3CurrentY += 0.8;
+                    
+                //Done with the initial flying
             }
             
             function draw() {
@@ -84,7 +94,11 @@
 
                context.restore();
                // draw arm without the stack
+               context.save();
+               //context.translate( canvas.width/2, canvas.height/2 );
+               context.translate(arm3CurrentX, arm3CurrentY);
                drawArm( 0, 0 );
+               context.restore();
                
                 //Start flying to form a triangle
             }
