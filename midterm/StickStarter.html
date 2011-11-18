@@ -41,7 +41,7 @@
             var arm3CurrentY = -320;
             var arm3FinalY = 0;
             var isTriangleFormed = false;
-            var shrinkBy = 0.9;
+            var shrinkBy = 1.0;
             var accumShrink = 0;
             
             function run()
@@ -73,25 +73,25 @@
                     arm3CurrentY += 1.4;
                     
                 //Done with the initial flying
-                isTriangleFormed = (arm1CurrentX > arm1FinalX) &&(arm2CurrentX < arm2FinalX) && (arm3CurrentX > arm3FinalX)&&(arm3CurrentY > arm3FinalY);
-                if(isTriangleFormed  && accumShrink <= .5) {
-                    accumShrink+=(1-shrinkBy);
+                isTriangleFormed = (arm1CurrentX > arm1FinalX)&&(arm1CurrentY <= arm1FinalY)&&(arm2CurrentX < arm2FinalX)&&(arm2CurrentY <= arm2FinalY)&&(arm3CurrentX > arm3FinalX)&&(arm3CurrentY > arm3FinalY);
+                if(isTriangleFormed  && shrinkBy >= .5) {
+                    shrinkBy-=0.05;
                 }
             }
             
             function draw() {
                 kin.clear();
                 context.save();
-                //if(isTriangleFormed)
-                //    context.translate( canvas.width/2, canvas.height/2 );
+                context.translate( canvas.width/2, canvas.height/2 );
+                if(isTriangleFormed)
+                    context.scale(shrinkBy, shrinkBy);
                 //if(isTriangleFormed && accumShrink <= .5)
-                //    context.scale(shrinkBy, shrinkBy);
-                //else if(accumShrink >= .5) {                    
+                //    
+                //else if{                    
                 //    context.setTransform(1,0,0,0,1,0,0,0,1);                    
                 //    context.transform(1,0,0,0,1,0,0,0,1);
                 //    context.translate( canvas.width/2, canvas.height/2 );
                 //}
-                context.translate( canvas.width/2, canvas.height/2 );
             
                 // save state 3
                context.save(); 
