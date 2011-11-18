@@ -24,8 +24,6 @@
                // I could have put armWidth and armHeight in here too.
             }
 
-            
-            var t = 0;
             var arm1Angle = 30;
             var arm2Angle = 0;
             var arm3FinalX = 0;
@@ -43,6 +41,8 @@
             var isTriangleFormed = false;
             var shrinkBy = 1.0;
             var accumShrink = 0;
+            var isOuterTriangleDrawn = false;
+            var isInnerTriangleShrunk = false;
             
             function run()
             {
@@ -51,7 +51,6 @@
             }
             
             function animate(){
-                t++;
                 // Update parameters here.
                 // Call this function at every iteration of the animation.
                 // Notice the js library that I included and didn't use - details in the reading
@@ -74,9 +73,11 @@
                     
                 //Done with the initial flying
                 isTriangleFormed = (arm1CurrentX > arm1FinalX)&&(arm1CurrentY <= arm1FinalY)&&(arm2CurrentX < arm2FinalX)&&(arm2CurrentY <= arm2FinalY)&&(arm3CurrentX > arm3FinalX)&&(arm3CurrentY > arm3FinalY);
-                if(isTriangleFormed  && shrinkBy >= .5) {
+                if(isTriangleFormed  && shrinkBy >= .5) 
                     shrinkBy-=0.05;
-                }
+                isInnerTriangleShrunk = shrinkBy <= .5;
+                        
+                
             }
             
             function draw() {
@@ -85,40 +86,84 @@
                 context.translate( canvas.width/2, canvas.height/2 );
                 if(isTriangleFormed)
                     context.scale(shrinkBy, shrinkBy);
-                //if(isTriangleFormed && accumShrink <= .5)
-                //    
-                //else if{                    
-                //    context.setTransform(1,0,0,0,1,0,0,0,1);                    
-                //    context.transform(1,0,0,0,1,0,0,0,1);
-                //    context.translate( canvas.width/2, canvas.height/2 );
-                //}
+                if(isInnerTriangleShrunk) {
+                    context.save();
+                    context.scale(2, 2);
+                    context.translate(0, -(arm2CurrentY/2));
+                    drawTriangle();
+                    isOuterTriangleDrawn = true;
+                    drawSquare();
+                    context.restore();
+                }
+                drawTriangle();
+                    
+                context.restore();
+            }
             
-                // save state 3
-               context.save(); 
-               // rotate by 30 degress clockwise
-               context.translate(arm1CurrentX, arm1CurrentY);
+            function drawTriangle(){
+                context.save(); 
+                context.translate(arm1CurrentX, arm1CurrentY);
                 context.rotate( getRadians(arm1Angle) );
-               
-               // draw arm 1 using state 3
-               drawArm( 0, 0 );
-
-               context.restore();
-               
-                // save state 1
-               context.save();
-               // translate to the center of the canvas
-               //context.translate( canvas.width/2, canvas.height/2 );
-               
-               context.translate(arm2CurrentX, arm2CurrentY);
-               context.rotate( getRadians(arm2Angle) );
-               drawArm( 0, 0 );
-
-               context.restore();
-               // draw arm without the stack
-               context.save();
-               context.translate(arm3CurrentX, arm3CurrentY);
-               drawArm( 0, 0 );
-               context.restore();
+                drawArm( 0, 0 );
+                context.restore();
+                
+                context.save();
+                context.translate(arm2CurrentX, arm2CurrentY);
+                context.rotate( getRadians(arm2Angle) );
+                drawArm( 0, 0 );
+                context.restore();
+                
+                context.save();
+                context.translate(arm3CurrentX, arm3CurrentY);
+                drawArm( 0, 0 );
+                context.restore();
+            }
+            
+            function drawSquare(){
+                context.save();
+                context.translate(-armWidth, -armWidth);
+                
+                //Top
+                context.save();
+                context.translate((armWidth/2)-(armHeight/2), -armWidth/2);
+                drawArm(0, 0);
+                context.save();
+                context.translate(armWidth, 0);
+                drawArm(0, 0);
+                context.restore();
+                context.restore();
+                
+                //Left
+                context.save();
+                context.rotate(getRadians(90));
+                drawArm(0, 0);
+                context.save();
+                context.translate(armWidth, 0);
+                drawArm(0, 0);
+                context.restore();
+                context.restore();
+                
+                //Bottom
+                context.save();
+                context.translate((armWidth/2)-(armHeight/2), armWidth+(armWidth/2));
+                drawArm(0, 0);
+                context.save();
+                context.translate(armWidth, 0);
+                drawArm(0, 0);
+                context.restore();
+                context.restore();
+                
+                //Right
+                context.save();
+                context.translate((armWidth*2)-(armHeight), 0);
+                context.rotate(getRadians(90));
+                drawArm(0, 0);
+                context.save();
+                context.translate(armWidth, 0);
+                drawArm(0, 0);
+                context.restore();
+                context.restore();
+                
                 context.restore();
             }
             
