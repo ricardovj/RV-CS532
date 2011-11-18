@@ -13,7 +13,7 @@
                 this.y = y;
                 this.width = armWidth;
                 this.height = armHeight;
-                context.fillRect(-armWidth / 2, -armHeight / 2, armWidth, armHeight);
+                context.fillRect(x-(armWidth/2), y-(armHeight/2), armWidth, armHeight);
             }
 
             function init()
@@ -28,14 +28,22 @@
             var t = 0;
             var arm1Angle = 30;
             var arm2Angle = 0;
-            var arm1FinalX = 78;
-            var arm2FinalX = -78;
-            var arm3FinalX = 480;
+            var arm3FinalX = 0;
             var arm1CurrentX = 0;
+            var arm1CurrentY = 0;
+            var arm1FinalX = 40;
+            var arm1FinalY = -67;
+            var arm2CurrentY = 0;
+            var arm2FinalY = -67;
+            var arm2FinalX = -40;
             var arm2CurrentX = 0;
-            var arm3CurrentX = 0;
-            var arm3CurrentY = 0;
-            var arm3FinalY = 460;
+            var arm3CurrentX = -480;
+            var arm3CurrentY = -320;
+            var arm3FinalY = 0;
+            var isTriangleFormed = false;
+            var shrinkBy = 0.9;
+            var accumShrink = 0;
+            
             function run()
             {
                 animate();
@@ -48,59 +56,70 @@
                 // Call this function at every iteration of the animation.
                 // Notice the js library that I included and didn't use - details in the reading
                 if(arm1Angle <= 60)
-                    arm1Angle += 0.2;
+                    arm1Angle += 0.4;
                 if(arm2Angle >= -60)
-                    arm2Angle -= 0.2;
+                    arm2Angle -= 0.4;
                 if(arm1CurrentX <= arm1FinalX)
-                    arm1CurrentX += 0.2;
+                    arm1CurrentX += 0.4;
+                if(arm1CurrentY > arm1FinalY)
+                    arm1CurrentY -= 0.4;
                 if(arm2CurrentX >= arm2FinalX)
-                    arm2CurrentX -= 0.2;
+                    arm2CurrentX -= 0.4;
+                if(arm2CurrentY > arm2FinalY)
+                    arm2CurrentY -= 0.4
                 if(arm3CurrentX <= arm3FinalX)
-                    arm3CurrentX += 0.8;
+                    arm3CurrentX += 1.4;
                 if(arm3CurrentY <= arm3FinalY)
-                    arm3CurrentY += 0.8;
+                    arm3CurrentY += 1.4;
                     
                 //Done with the initial flying
+                isTriangleFormed = (arm1CurrentX > arm1FinalX) &&(arm2CurrentX < arm2FinalX) && (arm3CurrentX > arm3FinalX)&&(arm3CurrentY > arm3FinalY);
+                if(isTriangleFormed  && accumShrink <= .5) {
+                    accumShrink+=(1-shrinkBy);
+                }
             }
             
             function draw() {
                 kin.clear();
-                // save state 1
-               context.save();
-               // translate to the center of the canvas
-               context.translate( canvas.width/2, canvas.height/2 );
-
-               // save state 2
-               context.save();
-               // grow arm by 20%
-               //   context.scale( 1.2, 1.2 );
-
-               // save state 3
+                context.save();
+                //if(isTriangleFormed)
+                //    context.translate( canvas.width/2, canvas.height/2 );
+                //if(isTriangleFormed && accumShrink <= .5)
+                //    context.scale(shrinkBy, shrinkBy);
+                //else if(accumShrink >= .5) {                    
+                //    context.setTransform(1,0,0,0,1,0,0,0,1);                    
+                //    context.transform(1,0,0,0,1,0,0,0,1);
+                //    context.translate( canvas.width/2, canvas.height/2 );
+                //}
+                context.translate( canvas.width/2, canvas.height/2 );
+            
+                // save state 3
                context.save(); 
                // rotate by 30 degress clockwise
-               context.rotate( getRadians(arm1Angle) );
-               context.translate(arm1CurrentX, 0);
-
-               // draw arm using state 3
+               context.translate(arm1CurrentX, arm1CurrentY);
+                context.rotate( getRadians(arm1Angle) );
+               
+               // draw arm 1 using state 3
                drawArm( 0, 0 );
 
                context.restore();
-               context.restore();
-               // draw arm using state 1
                
+                // save state 1
+               context.save();
+               // translate to the center of the canvas
+               //context.translate( canvas.width/2, canvas.height/2 );
+               
+               context.translate(arm2CurrentX, arm2CurrentY);
                context.rotate( getRadians(arm2Angle) );
-               context.translate(arm2CurrentX, 0);
                drawArm( 0, 0 );
 
                context.restore();
                // draw arm without the stack
                context.save();
-               //context.translate( canvas.width/2, canvas.height/2 );
                context.translate(arm3CurrentX, arm3CurrentY);
                drawArm( 0, 0 );
                context.restore();
-               
-                //Start flying to form a triangle
+                context.restore();
             }
             
             function getRadians(deg) {
