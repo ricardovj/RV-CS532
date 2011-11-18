@@ -1,0 +1,76 @@
+<!DOCTYPE HTML> 
+<html>
+    <head> 
+    <link rel="stylesheet" href="stick.css" type="text/css">
+    <script src="kinetic2d-v1.0.2.js"></script>
+    <script>
+            var armWidth = 160;
+            var armHeight = 10;
+
+            function drawArm(x, y)
+            {
+                this.x = x;
+                this.y = y;
+                this.width = armWidth;
+                this.height = armHeight;
+                context.fillRect(-armWidth / 2, -armHeight / 2, armWidth, armHeight);
+            }
+
+            function init()
+            {
+               canvas = document.getElementById("stickScene");
+               context = canvas.getContext("2d");
+               // More initialization stuff should go here.
+               // I could have put armWidth and armHeight in here too.
+            }
+
+            function run()
+            {
+                // Update parameters here.
+                // Call this function at every iteration of the animation.
+                // Notice the js library that I included and didn't use - details in the reading
+            }
+
+            window.onload = function() {
+               init();
+
+               // save state 1
+               context.save();
+               // translate to the center of the canvas
+               context.translate( canvas.width/2, canvas.height/2 );
+
+               // save state 2
+               context.save();
+               // grow arm by 20%
+               context.scale( 1.2, 1.2 );
+
+               // save state 3
+               context.save(); 
+               // rotate by 30 degress clockwise
+               context.rotate( Math.PI / 6 );
+
+               // draw arm using state 3
+               drawArm( 0,0 );
+
+               context.restore();
+               context.restore();
+               // draw arm using state 1
+               drawArm( 0,0 );
+
+               context.restore();
+               // draw arm without the stack
+               drawArm( 0,0 );
+
+               // Advice: Organize the inline block of code from here
+               // until 'init()' just above into hierarchical routines.
+               // 
+               // Also note that I'm always calling drawArm with the place-holder
+               // argument of (0,0); that's useless.  Instead, I could
+               // have passed the final destination coordinate.
+            };
+        </script> 
+    </head> 
+    <body onmousedown="return false;"> 
+        <canvas id="stickScene" width="960" height="640"></canvas> 
+    </body>
+</html>
