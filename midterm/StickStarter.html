@@ -26,15 +26,19 @@
 
             function run()
             {
+                animate();
+                draw();
+            }
+            
+            function animate(){
+                t++;
                 // Update parameters here.
                 // Call this function at every iteration of the animation.
                 // Notice the js library that I included and didn't use - details in the reading
             }
-
-            window.onload = function() {
-               init();
-
-               // save state 1
+            
+            function draw() {
+                // save state 1
                context.save();
                // translate to the center of the canvas
                context.translate( canvas.width/2, canvas.height/2 );
@@ -60,6 +64,20 @@
                context.restore();
                // draw arm without the stack
                drawArm( 0,0 );
+               
+                //Start flying to form a triangle
+            }
+            
+            var t = 0;
+
+            window.onload = function() {
+               init();
+               
+                kin = new Kinetic_2d("stickScene");
+                kin.setDrawStage(run);
+                kin.startAnimation();
+
+               
 
                // Advice: Organize the inline block of code from here
                // until 'init()' just above into hierarchical routines.
@@ -67,6 +85,8 @@
                // Also note that I'm always calling drawArm with the place-holder
                // argument of (0,0); that's useless.  Instead, I could
                // have passed the final destination coordinate.
+               
+               
             };
         </script> 
     </head> 
