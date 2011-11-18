@@ -24,6 +24,14 @@
                // I could have put armWidth and armHeight in here too.
             }
 
+            
+            var t = 0;
+            var arm1Angle = 30;
+            var arm2Angle = 0;
+            var arm1FinalX = 75;
+            var arm2FinalX = -75;
+            var arm1CurrentX = 0;
+            var arm2CurrentX = 0;
             function run()
             {
                 animate();
@@ -35,9 +43,18 @@
                 // Update parameters here.
                 // Call this function at every iteration of the animation.
                 // Notice the js library that I included and didn't use - details in the reading
+                if(arm1Angle <= 45)
+                    arm1Angle += 0.1;
+                if(arm2Angle >= -45)
+                    arm2Angle -= 0.1;
+                if(arm1CurrentX <= arm1FinalX)
+                    arm1CurrentX += 0.1;
+                if(arm2CurrentX >= arm2FinalX)
+                    arm2CurrentX -= 0.1;
             }
             
             function draw() {
+                kin.clear();
                 // save state 1
                context.save();
                // translate to the center of the canvas
@@ -46,29 +63,36 @@
                // save state 2
                context.save();
                // grow arm by 20%
-               context.scale( 1.2, 1.2 );
+               //   context.scale( 1.2, 1.2 );
 
                // save state 3
                context.save(); 
                // rotate by 30 degress clockwise
-               context.rotate( Math.PI / 6 );
+               context.rotate( getRadians(arm1Angle) );
+               context.translate(arm1CurrentX, 0);
 
                // draw arm using state 3
-               drawArm( 0,0 );
+               drawArm( 0, 0 );
 
                context.restore();
                context.restore();
                // draw arm using state 1
-               drawArm( 0,0 );
+               
+               context.rotate( getRadians(arm2Angle) );
+               context.translate(arm2CurrentX, 0);
+               drawArm( 0, 0 );
 
                context.restore();
                // draw arm without the stack
-               drawArm( 0,0 );
+               drawArm( 0, 0 );
                
                 //Start flying to form a triangle
             }
             
-            var t = 0;
+            function getRadians(deg) {
+                return deg * Math.PI / 180;
+            }
+            
 
             window.onload = function() {
                init();
